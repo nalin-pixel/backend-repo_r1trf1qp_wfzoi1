@@ -12,7 +12,7 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
 # Example schemas (replace with your own):
 
@@ -40,6 +40,32 @@ class Product(BaseModel):
 
 # Add your own schemas here:
 # --------------------------------------------------
+
+class NutritionFacts(BaseModel):
+    calories: float = Field(0, ge=0, description="Calories (kcal)")
+    protein: float = Field(0, ge=0, description="Protein (g)")
+    carbs: float = Field(0, ge=0, description="Carbohydrates (g)")
+    fat: float = Field(0, ge=0, description="Fat (g)")
+
+class IngredientItem(BaseModel):
+    name: str = Field(..., description="Ingredient name, e.g., 'Chicken Breast'")
+    quantity: float = Field(1, ge=0, description="Quantity for the ingredient")
+    unit: str = Field("unit", description="Unit of measure, e.g., g, ml, cups")
+    nutrition: Optional[NutritionFacts] = Field(default_factory=NutritionFacts)
+
+class Recipe(BaseModel):
+    """
+    Recipes collection schema
+    Collection name: "recipe"
+    """
+    title: str = Field(..., description="Recipe title")
+    description: Optional[str] = Field(None, description="Short description")
+    servings: int = Field(1, ge=1, description="Number of servings")
+    tags: List[str] = Field(default_factory=list, description="Tags like dinner, vegan")
+    ingredients: List[IngredientItem] = Field(default_factory=list)
+    instructions: List[str] = Field(default_factory=list, description="Step-by-step instructions")
+    total_nutrition: Optional[NutritionFacts] = None
+    image_url: Optional[str] = None
 
 # Note: The Flames database viewer will automatically:
 # 1. Read these schemas from GET /schema endpoint
